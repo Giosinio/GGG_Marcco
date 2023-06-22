@@ -6,6 +6,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Random;
 import java.util.stream.Collectors;
 import org.example.algorithm.LeeAlgorithmSolver;
 import org.example.algorithm.LeeResult;
@@ -15,14 +16,15 @@ import org.example.dto.enums.ConstructionType;
 import org.example.dto.enums.ObjectType;
 
 public class Utils {
+    private static final Random random = new Random();
     private static final int MAXIMUM_STAMINA = 10;
 
-    private static final int BUILD_AFTER_ROUND = 180; //TODO - herte change this if the number of rounds is not 300, approximately 65% of the number of rounds
+    private static final int BUILD_AFTER_ROUND = 225; //TODO - herte change this if the number of rounds is not 300, approximately 65% of the number of rounds
 
     //objects are the objects on the map, all the food, building resources and bunnies(since 2 bunnies cannot be at the same time on the same tile,
     // we should be safe to consider we are on a resource if that resource is found)
     public static String makeAction(Bunny bunny, char[][] table, String botId, Map<ObjectType, List<MapPosition>> objects, List<CollectableItem> collectableItems, List<MapPosition> buildingsPositions) {
-        if(bunny.isFirstMarketOffer) {
+        if(bunny.isFirstMarketOffer && bunny.currentRound >= 250) {
             List<String> marketKeys = Arrays.asList("carrot", "leaves", "beets", "flower", "wood", "clay", "rock", "hay");
 
             for(String key: marketKeys) {
@@ -66,7 +68,17 @@ public class Utils {
     }
 
     private static String computeResponse(Bunny bunny, char[][] table, List<CollectableItem> collectableItems, String botId){
-        String direction=getDirection(bunny, table, collectableItems);
+        String direction;
+        try {
+            direction = getDirection(bunny, table, collectableItems);
+        } catch (NullPointerException ignored) {
+            System.out.println("NPE!!!");
+            List<String> randomStrings = Arrays.asList("left", "right", "up", "down");
+            int min = 0;
+            int max = 3;
+            int randomNumber = random.nextInt(max - min + 1) + min;
+            return randomStrings.get(randomNumber) + ":1";
+        }
         String directionSide=direction.split(":")[0];
         int speed=Integer.parseInt(direction.split(":")[1]);
         return "{ \"hop\" : \""+directionSide+"\", \"speed\":"+speed+", \"bot_id\" :\"" + botId + "\" }";
@@ -133,7 +145,6 @@ public class Utils {
                         if(checkIfWeHaveEnoughFoodToBuild(bunny, constructionType)) {
                             ObjectType eatenResource = getTheFoodWeWillEatFromTheBackpack(bunny, constructionType);
                             if(Objects.nonNull(eatenResource)) {
-                                System.out.println("!!!Extraordinary case!!!");
                                 return "eat|" + eatenResource.name().toLowerCase();
                             }
                         }

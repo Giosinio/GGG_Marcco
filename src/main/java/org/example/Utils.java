@@ -104,8 +104,8 @@ public class Utils {
         if(table[i][j] == 's' && bunny.getStamina() < MAXIMUM_STAMINA) {
             return "drink";
         }
-        if(objectType != null && objectType != ObjectType.BUNNS) {
-            if(objectType == ObjectType.BEETS || objectType == ObjectType.LEAVES || objectType == ObjectType.CARROT) {
+        if(objectType != null && objectType != ObjectType.bunns) {
+            if(objectType == ObjectType.beets || objectType == ObjectType.leaves || objectType == ObjectType.carrot) {
                 if(bunny.stamina + objectType.getGivenStamina() <= MAXIMUM_STAMINA) {
                     return "eat";
                 }
@@ -161,7 +161,7 @@ public class Utils {
     public static ObjectType checkCollectableResourceAtTheGivenPosition(int row, int column, Map<ObjectType, List<MapPosition>> objects) {
         MapPosition bunnyMapPosition = new MapPosition(row, column);
         for(Map.Entry<ObjectType, List<MapPosition>> objectEntry: objects.entrySet()) {
-            if(objectEntry.getValue().contains(bunnyMapPosition) && objectEntry.getKey() != ObjectType.BUNNS) {
+            if(objectEntry.getValue().contains(bunnyMapPosition) && objectEntry.getKey() != ObjectType.bunns) {
                 return objectEntry.getKey();
             }
         }

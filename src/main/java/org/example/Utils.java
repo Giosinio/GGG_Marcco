@@ -25,7 +25,7 @@ public class Utils {
     // we should be safe to consider we are on a resource if that resource is found)
     public static String makeAction(Bunny bunny, char[][] table, String botId, Map<ObjectType, List<MapPosition>> objects, List<CollectableItem> collectableItems, List<MapPosition> buildingsPositions) {
         if(bunny.isFirstMarketOffer && bunny.currentRound >= 250) {
-            List<String> marketKeys = Arrays.asList("carrot", "leaves", "beets", "flower", "wood", "clay", "rock", "hay");
+            List<String> marketKeys = Arrays.asList("wood", "rock", "leaves", "carrot", "clay", "beets", "flower", "hay");
 
             for(String key: marketKeys) {
                 int localCount = bunny.backpack.get(ObjectType.valueOf(key));

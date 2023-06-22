@@ -1,7 +1,7 @@
 package org.example.dto.enums;
 
 public enum ObjectType {
-    LEAVES(3), CARROT(4), BEETS(2), FLOWER(2), WOOD(0), CLAY(0), ROCK(0), HAY(3), BUNNS(0);
+    leaves(3), carrot(4), beets(2), flower(2), wood(0), clay(0), rock(0), hay(3), bunns(0);
 
     final Integer givenStamina;
 

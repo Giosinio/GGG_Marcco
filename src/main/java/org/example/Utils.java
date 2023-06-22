@@ -30,7 +30,7 @@ public class Utils {
             return "{ \"action\": \"drink\", \"botId\":" + botId + "\" }";
         }
         if(decider.contains("eat")) {
-            String[] bits = decider.split("|");
+            String[] bits = decider.split("\\|");
             if(bits.length == 1) {
                 return "{ \"action\" : \"eat\", \"bot_id\" :\"" + botId + "\" }";
             }
@@ -43,8 +43,8 @@ public class Utils {
             return "{ \"action\" : \"pick\", \"bot_id\" :\"" + botId + "\" }";
         }
         else if(decider.contains("build")) {
-            String[] bits = decider.split("|");
-            ConstructionType constructionType = ConstructionType.valueOf(bits[1]);
+            String[] bits = decider.split("\\|");
+            ConstructionType constructionType = ConstructionType.valueOf(bits[1].toUpperCase());
             return "{ \"action\" : \"build\", \"what\": \"" + constructionType.name().toLowerCase() + "\", \"bot_id\" :\"" + botId + "\" }";
         }
         else {
@@ -67,7 +67,7 @@ public class Utils {
         int j = bunny.column;
         LeeResult result = LeeAlgorithmSolver.solveLee(table,i,j);
         computeCoeffs(collectableItems, result);
-        collectableItems.sort((o1, o2) -> Double.compare(o2.coefficient, o1.coefficient));
+        collectableItems.sort(Comparator.comparingDouble(o -> o.coefficient));
         CollectableItem bestCollectableItem = collectableItems.get(0);
 
         return getNextMove(new Pair<>(bestCollectableItem.mapPosition.row, bestCollectableItem.mapPosition.col), bunny, result.positionsMatrix);

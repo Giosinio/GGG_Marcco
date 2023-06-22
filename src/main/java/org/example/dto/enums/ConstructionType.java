@@ -1,7 +1,10 @@
 package org.example.dto.enums;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 import org.example.Bunny;
 
 public enum ConstructionType {
@@ -43,5 +46,11 @@ public enum ConstructionType {
 
     public int getScore() {
         return score;
+    }
+
+    public static Set<String> getKeys() {
+        return Arrays.stream(ObjectType.values())
+                .map(Object::toString)
+                .collect(Collectors.toSet());
     }
 }

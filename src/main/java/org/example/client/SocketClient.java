@@ -2,6 +2,7 @@ package org.example.client;
 
 import java.io.IOException;
 import org.example.client.MyClient;
+import org.example.dto.enums.ObjectType;
 
 public final class SocketClient {
 

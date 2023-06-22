@@ -1,24 +1,26 @@
 package org.example;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import org.example.algorithm.LeeAlgorithmSolver;
+import org.example.algorithm.LeeResult;
+import org.example.dto.CollectableItem;
 import org.example.dto.MapPosition;
 import org.example.dto.enums.ConstructionType;
 import org.example.dto.enums.ObjectType;
 
-import jdk.nashorn.internal.ir.BaseNode;
-
 public class Utils {
     private static final int MAXIMUM_STAMINA = 10;
 
-    private static final int NUMBER_ROUNDS = 300;
+    private static final int NUMBER_ROUNDS = 300; // TODO: build all you can after round 225
 
     //objects are the objects on the map, all the food, building resources and bunnies(since 2 bunnies cannot be at the same time on the same tile,
     // we should be safe to consider we are on a resource if that resource is found)
-    public static String makeAction(Bunny bunny, char[][] table, String botId, Map<ObjectType, List<MapPosition>> objects) {
+    public static String makeAction(Bunny bunny, char[][] table, String botId, Map<ObjectType, List<MapPosition>> objects, List<CollectableItem> collectableItems) {
         int i = bunny.row;
         int j = bunny.column;
         ObjectType bunnyObjectType = checkCollectableResourceAtTheGivenPosition(i, j, objects); // the object type on which the bunny stands on
@@ -47,56 +49,55 @@ public class Utils {
         }
         else {
             //TODO: implement move action
-//            return computeResponse(robot,tabla,trashes,dumpsterList,botId);
-            return "{ \"action\" : \"hop\", \"speed\": \"" + "1" + "\", \"bot_id\" :\"" + botId + "\" }";
+            return computeResponse(bunny, table, collectableItems, botId);
+//            return "{ \"hop\" : \"up\", \"speed\": \"" + "1" + "\", \"bot_id\" :\"" + botId + "\" }";
 
         }
     }
 
-//    private static String computeResponse(Bunny bunny, char[][] table, List<Trash> trashes, List<Dumpster> dumpsterList,String botId){
-//        String direction=getDirection(bunny, table, trashes, dumpsterList);
-//        if(direction==null){
-//            return null;
-//        }
-//        String directionSide=direction.split(":")[0];
-//        int speed=Integer.parseInt(direction.split(":")[1]);
-//        return "{ \"move\" : \""+directionSide+"\", \"speed\":"+speed+", \"bot_id\" :\"" + botId + "\" }";
-//    }
+    private static String computeResponse(Bunny bunny, char[][] table, List<CollectableItem> collectableItems, String botId){
+        String direction=getDirection(bunny, table, collectableItems);
+        String directionSide=direction.split(":")[0];
+        int speed=Integer.parseInt(direction.split(":")[1]);
+        return "{ \"hop\" : \""+directionSide+"\", \"speed\":"+speed+", \"bot_id\" :\"" + botId + "\" }";
+    }
 
-//    private static String getDirection(Bunny bunny, char[][] table, List<Trash> trashes,List<Dumpster> dumpsterList){
-//        int i = robot.row;
-//        int j = robot.col;
-//        LeeResult result=LeeAlgorithmSolver.solveLee(table,i,j);
-//        computeCoeffs(trashes,result);
-//        trashes.sort((o1, o2) -> Double.compare(o2.coefficient, o1.coefficient));
-//        Trash bestTrash=null;
-//        for (Trash trash : trashes) {
-//            if (robot.canStore(trash)) {
-//                bestTrash = trash;
-//                break;
-//            }
-//        }
-//        if(bestTrash!=null){
-//            return getNextMove(new Pair<>(bestTrash.row, bestTrash.column), robot, result.positionsMatrix);
-//        }
-//        List<Container> containers = robot.containerList;
-//        containers.sort(new Comparator<Container>() {
-//            @Override
-//            public int compare(Container o1, Container o2) {
-//                return Integer.compare(o2.getFilled(),o1.filled);
-//            }
-//        });
-//        Container bestContainer=containers.get(0);
-//        ObjectType containerType=bestContainer.getType();
-//        Dumpster dumpster=dumpsterList.stream()
-//                .filter(dumpster1 -> dumpster1.objectType.equals(containerType))
-//                .findFirst()
-//                .orElse(null);
-//        if(dumpster==null){
-//            return null;
-//        }
-//        return getNextMove(new Pair<>(dumpster.row, dumpster.column), robot, result.positionsMatrix);
-//    }
+    private static String getDirection(Bunny bunny, char[][] table, List<CollectableItem> collectableItems){
+        int i = bunny.row;
+        int j = bunny.column;
+        LeeResult result = LeeAlgorithmSolver.solveLee(table,i,j);
+        computeCoeffs(collectableItems, result);
+        collectableItems.sort((o1, o2) -> Double.compare(o2.coefficient, o1.coefficient));
+        CollectableItem bestCollectableItem = collectableItems.get(0);
+
+        return getNextMove(new Pair<>(bestCollectableItem.mapPosition.row, bestCollectableItem.mapPosition.col), bunny, result.positionsMatrix);
+    }
+
+    private static String getNextMove(Pair<Integer,Integer> currentPoint, Bunny bunny, Pair[][] positionsDistances) {
+        if(positionsDistances[currentPoint.getFirst()][currentPoint.getSecond()].equals(new Pair<>(bunny.row, bunny.column))) {
+            if(currentPoint.getFirst() == bunny.row) {
+                int distance = Math.abs(bunny.column - currentPoint.getSecond());
+                if(currentPoint.getSecond() < bunny.column) {
+                    return "left:" + distance;
+                }
+                else {
+                    return "right:"+distance;
+                }
+            }
+            else {
+                int distance = Math.abs(bunny.row - currentPoint.getFirst());
+                if(currentPoint.getFirst() < bunny.row) {
+                    return "up:"+distance;
+                }
+                else {
+                    return "down:"+distance;
+                }
+            }
+        }
+        else {
+            return getNextMove(positionsDistances[currentPoint.getFirst()][currentPoint.getSecond()], bunny, positionsDistances);
+        }
+    }
 
     public static String checkPosition(Bunny bunny, char[][] table, ObjectType objectType) {
         int i = bunny.row;
@@ -166,5 +167,24 @@ public class Utils {
             }
         }
         return null;
+    }
+
+    public static List<CollectableItem> changeMappingToCollectableItemList(Map<ObjectType, List<MapPosition>> objects) {
+        List<CollectableItem> collectableItems = new ArrayList<>();
+        for (Map.Entry<ObjectType, List<MapPosition>> mapEntry : objects.entrySet()) {
+            ObjectType objectType = mapEntry.getKey();
+            if(objectType==ObjectType.bunns){
+                continue;
+            }
+            for(MapPosition mapPosition: mapEntry.getValue()) {
+                collectableItems.add(new CollectableItem(mapPosition, objectType));
+            }
+        }
+        return collectableItems;
+    }
+
+    private static void computeCoeffs(List<CollectableItem> collectableItems, LeeResult result){
+        collectableItems.stream().
+                forEach(collectableItem -> collectableItem.coefficient = result.distanceMatrix[collectableItem.mapPosition.row][collectableItem.mapPosition.col]);
     }
 }

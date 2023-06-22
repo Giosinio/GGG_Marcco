@@ -6,22 +6,25 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.Map;
 
 import org.example.Bunny;
+import org.example.dto.CollectableItem;
 import org.example.dto.MarccoMessage;
 import org.example.dto.enums.MessageType;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import static org.example.Utils.changeMappingToCollectableItemList;
 import static org.example.Utils.makeAction;
 
 class MyClient implements Runnable {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
     public static String botId;
-    char[][]board;
+    char[][] board;
     private final Socket connection;
     private boolean connected = true;
     private final BufferedReader buffReader;
@@ -79,6 +82,7 @@ class MyClient implements Runnable {
 
             } while (c != (char) 0);
             String stringMessage = message.toString();
+            System.out.println(stringMessage);
 
             String json = stringMessage.substring(stringMessage.indexOf("{"), stringMessage.lastIndexOf("}") + 1);
             if (botId == null) {
@@ -90,6 +94,7 @@ class MyClient implements Runnable {
                     System.out.println("not good :(");
                 } else {
                     MarccoMessage marccoMessage = objectMapper.readValue(json, MarccoMessage.class);
+                    marccoMessage.mapObjectsToCollectableObjects();
                     if (marccoMessage.gameBoard != null) {
                         marccoMessage.messageType = MessageType.GAME_BOARD;
                         this.board=marccoMessage.gameBoard;
@@ -100,14 +105,14 @@ class MyClient implements Runnable {
                     bunny.setStamina(marccoMessage.stamina);
                     bunny.setCurrentRound(marccoMessage.round);
                     bunny.setBackpack(marccoMessage.backpack);
-                    String resp=makeAction(bunny, this.board, botId, marccoMessage.objects);
+                    List<CollectableItem> collectableIemList = changeMappingToCollectableItemList(marccoMessage.collectableObjects);
+                    String resp=makeAction(bunny, this.board, botId, marccoMessage.collectableObjects, collectableIemList);
 
                     this.sendMessage(resp);
                 }
             }
         }
     }
-
 
 
     public void close() throws IOException {

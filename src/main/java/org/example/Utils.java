@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import org.example.algorithm.LeeAlgorithmSolver;
 import org.example.algorithm.LeeResult;
@@ -16,18 +17,18 @@ import org.example.dto.enums.ObjectType;
 public class Utils {
     private static final int MAXIMUM_STAMINA = 10;
 
-    private static final int NUMBER_ROUNDS = 300; // TODO: build all you can after round 225
+    private static final int BUILD_AFTER_ROUND = 180; //TODO - herte change this if the number of rounds is not 300, approximately 65% of the number of rounds
 
     //objects are the objects on the map, all the food, building resources and bunnies(since 2 bunnies cannot be at the same time on the same tile,
     // we should be safe to consider we are on a resource if that resource is found)
-    public static String makeAction(Bunny bunny, char[][] table, String botId, Map<ObjectType, List<MapPosition>> objects, List<CollectableItem> collectableItems) {
+    public static String makeAction(Bunny bunny, char[][] table, String botId, Map<ObjectType, List<MapPosition>> objects, List<CollectableItem> collectableItems, List<MapPosition> buildingsPositions) {
         int i = bunny.row;
         int j = bunny.column;
         ObjectType bunnyObjectType = checkCollectableResourceAtTheGivenPosition(i, j, objects); // the object type on which the bunny stands on
-        String decider = checkPosition(bunny, table, bunnyObjectType);
+        String decider = checkPosition(bunny, table, bunnyObjectType, buildingsPositions);
 
         if ("drink".equals(decider)) {
-            return "{ \"action\": \"drink\", \"botId\":" + botId + "\" }";
+            return "{ \"action\": \"drink\", \"bot_id\":\"" + botId + "\" }";
         }
         if(decider.contains("eat")) {
             String[] bits = decider.split("\\|");
@@ -44,13 +45,11 @@ public class Utils {
         }
         else if(decider.contains("build")) {
             String[] bits = decider.split("\\|");
-            ConstructionType constructionType = ConstructionType.valueOf(bits[1].toUpperCase());
+            ConstructionType constructionType = ConstructionType.valueOf(bits[1]);
             return "{ \"action\" : \"build\", \"what\": \"" + constructionType.name().toLowerCase() + "\", \"bot_id\" :\"" + botId + "\" }";
         }
         else {
-            //TODO: implement move action
             return computeResponse(bunny, table, collectableItems, botId);
-//            return "{ \"hop\" : \"up\", \"speed\": \"" + "1" + "\", \"bot_id\" :\"" + botId + "\" }";
 
         }
     }
@@ -99,7 +98,7 @@ public class Utils {
         }
     }
 
-    public static String checkPosition(Bunny bunny, char[][] table, ObjectType objectType) {
+    public static String checkPosition(Bunny bunny, char[][] table, ObjectType objectType, List<MapPosition> buildingsPositions) {
         int i = bunny.row;
         int j = bunny.column;
         if(table[i][j] == 's' && bunny.getStamina() < MAXIMUM_STAMINA) {
@@ -122,10 +121,18 @@ public class Utils {
                     if(bunny.stamina < constructionType.stamina) {
                         if(checkIfWeHaveEnoughFoodToBuild(bunny, constructionType)) {
                             ObjectType eatenResource = getTheFoodWeWillEatFromTheBackpack(bunny, constructionType);
-                            return "eat|" + eatenResource.name().toLowerCase();
+                            if(Objects.nonNull(eatenResource)) {
+                                System.out.println("!!!Extraordinary case!!!");
+                                return "eat|" + eatenResource.name().toLowerCase();
+                            }
                         }
                     }
-                    return "build|" + constructionType.name().toLowerCase();
+                    else {
+                        MapPosition bunnyPosition = new MapPosition(bunny.row, bunny.column);
+                        if(!buildingsPositions.contains(bunnyPosition) && (constructionType.score >= 100 || bunny.currentRound >= BUILD_AFTER_ROUND)) {
+                            return "build|" + constructionType.name().toLowerCase();
+                        }
+                    }
                 }
             }
         }
@@ -149,10 +156,10 @@ public class Utils {
         for(Map.Entry<ObjectType, Integer> backpackObject: bunny.backpack.entrySet()) {
             ObjectType key = backpackObject.getKey();
             Integer count = backpackObject.getValue();
-            if(count > 0 && (eatedObjectType == null || key.getGivenStamina() > eatedObjectType.getGivenStamina())) {
+            if(count > 0 && key.getGivenStamina() > 0 && key != ObjectType.hay && key != ObjectType.flower && (eatedObjectType == null || key.getGivenStamina() > eatedObjectType.getGivenStamina())) {
                 eatedObjectType = key;
             }
-            if(count > 0 && key.getGivenStamina() == differenceStamina) {
+            if(count > 0 && key.getGivenStamina() > 0 && key != ObjectType.hay && key != ObjectType.flower && key.getGivenStamina() == differenceStamina) {
                 return key;
             }
         }
@@ -184,7 +191,7 @@ public class Utils {
     }
 
     private static void computeCoeffs(List<CollectableItem> collectableItems, LeeResult result){
-        collectableItems.stream().
+        collectableItems.
                 forEach(collectableItem -> collectableItem.coefficient = result.distanceMatrix[collectableItem.mapPosition.row][collectableItem.mapPosition.col]);
     }
 }

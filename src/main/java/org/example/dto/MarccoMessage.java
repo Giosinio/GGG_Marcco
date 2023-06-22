@@ -39,40 +39,4 @@ public class MarccoMessage {
         }
     }
 
-//    public String getGameBoardAsString(char[][] gameBoard) {
-//        if (gameBoard != null) {
-//            StringBuilder stringBuilder = new StringBuilder();
-//            stringBuilder.append("[");
-//            for (char[] row : gameBoard) {
-//                stringBuilder.append("[");
-//                for (char column : row) {
-//                    stringBuilder.append("\"");
-//                    stringBuilder.append(column);
-//                    stringBuilder.append("\"");
-//                    stringBuilder.append(",");
-//                }
-//                stringBuilder.append("]");
-//            }
-//            return stringBuilder.toString();
-//        }
-//        return "";
-//    }
-
-//    public String getObjectsAsString(Map<ObjectType, MarccoObject[]> objects) {
-//        if (objects != null) {
-//            StringBuilder stringBuilder = new StringBuilder();
-//            stringBuilder.append("{");
-//            for (Map.Entry<ObjectType, MarccoObject[]> entry : objects.entrySet()) {
-//                stringBuilder.append("\"");
-//                stringBuilder.append(entry.getKey());
-//                stringBuilder.append("\"");
-//                stringBuilder.append("=");
-//                stringBuilder.append("\"");
-//                stringBuilder.append(Arrays.toString(entry.getValue()));
-//                stringBuilder.append("\"");
-//            }
-//            return stringBuilder.toString();
-//        }
-//        return "";
-//    }
 }

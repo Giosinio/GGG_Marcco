@@ -6,12 +6,16 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.example.Bunny;
 import org.example.dto.CollectableItem;
+import org.example.dto.MapPosition;
 import org.example.dto.MarccoMessage;
+import org.example.dto.enums.ConstructionType;
 import org.example.dto.enums.MessageType;
 
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -106,12 +110,28 @@ class MyClient implements Runnable {
                     bunny.setCurrentRound(marccoMessage.round);
                     bunny.setBackpack(marccoMessage.backpack);
                     List<CollectableItem> collectableIemList = changeMappingToCollectableItemList(marccoMessage.collectableObjects);
-                    String resp=makeAction(bunny, this.board, botId, marccoMessage.collectableObjects, collectableIemList);
+                    List<MapPosition> buildingsPositions = getBuildingsPositions(marccoMessage.objects);
+                    String resp=makeAction(bunny, this.board, botId, marccoMessage.collectableObjects, collectableIemList, buildingsPositions);
 
+                    System.out.println(resp);
+                    System.out.println(buildingsPositions.size());
                     this.sendMessage(resp);
                 }
             }
         }
+    }
+
+    private static List<MapPosition> getBuildingsPositions(Map<String, List<MapPosition>> objects) {
+        Set<String> buildingsKeys = ConstructionType.getKeys();
+        List<MapPosition> result = new ArrayList<>();
+        for(Map.Entry<String, List<MapPosition>> entry: objects.entrySet()) {
+            String key = entry.getKey();
+            if(buildingsKeys.contains(key)) {
+                List<MapPosition> currentBuildingsPositions = entry.getValue();
+                result.addAll(currentBuildingsPositions);
+            }
+        }
+        return result;
     }
 
 

@@ -8,11 +8,11 @@ import java.util.stream.Collectors;
 import org.example.Bunny;
 
 public enum ConstructionType {
-    BURROW(5, buildCostsMap(1, 0, 0, 0, 0), 20),
-    HUT(3, buildCostsMap(0, 2, 3, 0, 0), 50),
-    FENCE(1, buildCostsMap(0, 0, 0, 2, 0), 10),
-    DWELLING(7, buildCostsMap(2, 2, 2, 2, 0), 200),
-    VILLA(9, buildCostsMap(2, 3, 2, 4, 1), 500);
+    burrow(5, buildCostsMap(1, 0, 0, 0, 0), 20),
+    hut(3, buildCostsMap(0, 2, 3, 0, 0), 50),
+    fence(1, buildCostsMap(0, 0, 0, 2, 0), 10),
+    dwelling(7, buildCostsMap(2, 2, 2, 2, 0), 200),
+    villa(9, buildCostsMap(2, 3, 2, 4, 1), 500);
     public final int stamina;
     public final Map<ObjectType, Integer> constructionCost;
     public final int score;
@@ -49,7 +49,7 @@ public enum ConstructionType {
     }
 
     public static Set<String> getKeys() {
-        return Arrays.stream(ObjectType.values())
+        return Arrays.stream(ConstructionType.values())
                 .map(Object::toString)
                 .collect(Collectors.toSet());
     }

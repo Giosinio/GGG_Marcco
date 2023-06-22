@@ -9,6 +9,7 @@ public class Bunny {
     public Map<ObjectType, Integer> backpack;
     public int stamina;
     public int currentRound; //not specific to bunny, but we need this
+    public boolean isFirstMarketOffer = true;
 
 
     public void updateLocation(int row, int column) {
@@ -36,3 +37,4 @@ public class Bunny {
         this.backpack = backpack;
     }
 }
+

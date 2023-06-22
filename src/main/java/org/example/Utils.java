@@ -22,6 +22,17 @@ public class Utils {
     //objects are the objects on the map, all the food, building resources and bunnies(since 2 bunnies cannot be at the same time on the same tile,
     // we should be safe to consider we are on a resource if that resource is found)
     public static String makeAction(Bunny bunny, char[][] table, String botId, Map<ObjectType, List<MapPosition>> objects, List<CollectableItem> collectableItems, List<MapPosition> buildingsPositions) {
+        if(bunny.isFirstMarketOffer) {
+            List<String> marketKeys = Arrays.asList("carrot", "leaves", "beets", "flower", "wood", "clay", "rock", "hay");
+
+            for(String key: marketKeys) {
+                int localCount = bunny.backpack.get(ObjectType.valueOf(key));
+                if(localCount > 0) {
+                    bunny.isFirstMarketOffer = false;
+                    return "{ \"market\": \"offer\", \"offer\": {\"offerType\": \"" + key + "\", \"offerCount\": 1, \"costType\": \"wood\", \"costCount\": 4}, \"bot_id\": \"" + botId +"\"}";
+                }
+            }
+        }
         int i = bunny.row;
         int j = bunny.column;
         ObjectType bunnyObjectType = checkCollectableResourceAtTheGivenPosition(i, j, objects); // the object type on which the bunny stands on

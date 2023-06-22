@@ -20,11 +20,11 @@ public enum ConstructionType {
 
     private static Map<ObjectType, Integer> buildCostsMap(int clay, int hay, int rocks, int wood, int flowers) {
         Map<ObjectType, Integer> constructionCost = new HashMap<>();
-        constructionCost.put(ObjectType.CLAY, clay);
-        constructionCost.put(ObjectType.HAY, hay);
-        constructionCost.put(ObjectType.ROCK, rocks);
-        constructionCost.put(ObjectType.WOOD, wood);
-        constructionCost.put(ObjectType.FLOWER, flowers);
+        constructionCost.put(ObjectType.clay, clay);
+        constructionCost.put(ObjectType.hay, hay);
+        constructionCost.put(ObjectType.rock, rocks);
+        constructionCost.put(ObjectType.wood, wood);
+        constructionCost.put(ObjectType.flower, flowers);
 
         return constructionCost;
     }

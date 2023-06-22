@@ -98,17 +98,17 @@ class MyClient implements Runnable {
                     }
                     bunny.updateLocation(marccoMessage.row,marccoMessage.col);
                     bunny.setStamina(marccoMessage.stamina);
-                    String resp=makeAction(bunny, this.board, botId);
-                    if (resp == null) {
-                        continue;
-                    }
-                    this.sendMessage(resp);
+                    bunny.setCurrentRound(marccoMessage.round);
+                    bunny.setBackpack(marccoMessage.backpack);
+                    String resp=makeAction(bunny, this.board, botId, marccoMessage.objects);
 
-                    //TODO: do smth with message
+                    this.sendMessage(resp);
                 }
             }
         }
     }
+
+
 
     public void close() throws IOException {
         this.connected = false;

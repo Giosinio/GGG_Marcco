@@ -5,17 +5,19 @@ import java.util.Map;
 import org.example.Bunny;
 
 public enum ConstructionType {
-    BURROW(5, buildCostsMap(1, 0, 0, 0, 0)),
-    HUT(3, buildCostsMap(0, 2, 3, 0, 0)),
-    FENCE(1, buildCostsMap(0, 0, 0, 2, 0)),
-    DWELLING(7, buildCostsMap(2, 2, 2, 2, 0)),
-    VILLA(9, buildCostsMap(2, 3, 2, 4, 1));
-    public int stamina;
-    public Map<ObjectType, Integer> constructionCost;
+    BURROW(5, buildCostsMap(1, 0, 0, 0, 0), 20),
+    HUT(3, buildCostsMap(0, 2, 3, 0, 0), 50),
+    FENCE(1, buildCostsMap(0, 0, 0, 2, 0), 10),
+    DWELLING(7, buildCostsMap(2, 2, 2, 2, 0), 200),
+    VILLA(9, buildCostsMap(2, 3, 2, 4, 1), 500);
+    public final int stamina;
+    public final Map<ObjectType, Integer> constructionCost;
+    public final int score;
 
-    ConstructionType(int stamina, Map<ObjectType, Integer> constructionCost) {
+    ConstructionType(int stamina, Map<ObjectType, Integer> constructionCost, int score) {
         this.stamina = stamina;
         this.constructionCost = constructionCost;
+        this.score = score;
     }
 
     private static Map<ObjectType, Integer> buildCostsMap(int clay, int hay, int rocks, int wood, int flowers) {
@@ -29,10 +31,7 @@ public enum ConstructionType {
         return constructionCost;
     }
 
-    public static boolean checkIfItCanBeBuilt(ConstructionType constructionType, Bunny bunny) {
-        if(bunny.getStamina() < constructionType.stamina) {
-            return false;
-        }
+    public static boolean checkIfWeHaveEnoughMaterials(ConstructionType constructionType, Bunny bunny) {
         for(Map.Entry<ObjectType, Integer> constructionCostEntity: constructionType.constructionCost.entrySet()) {
             int resourcesInBackPack = bunny.backpack.get(constructionCostEntity.getKey());
             if(constructionCostEntity.getValue() > 0 && resourcesInBackPack < constructionCostEntity.getValue()) {
@@ -42,5 +41,7 @@ public enum ConstructionType {
         return true;
     }
 
-
+    public int getScore() {
+        return score;
+    }
 }

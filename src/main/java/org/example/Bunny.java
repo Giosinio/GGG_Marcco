@@ -8,6 +8,7 @@ public class Bunny {
     public int column;
     public Map<ObjectType, Integer> backpack;
     public int stamina;
+    public int currentRound; //not specific to bunny, but we need this
 
 
     public void updateLocation(int row, int column) {
@@ -21,5 +22,17 @@ public class Bunny {
 
     public void setStamina(int stamina) {
         this.stamina = stamina;
+    }
+
+    public void setCurrentRound(int currentRound) {
+        this.currentRound = currentRound;
+    }
+
+    public Map<ObjectType, Integer> getBackpack() {
+        return backpack;
+    }
+
+    public void setBackpack(Map<ObjectType, Integer> backpack) {
+        this.backpack = backpack;
     }
 }

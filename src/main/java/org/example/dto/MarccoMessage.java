@@ -27,7 +27,8 @@ public class MarccoMessage {
     public int row;
     public int col;
     public int stamina;
-    public List<MarketObj> gained;
+
+    public List<Gained> gained;
 
     public void mapObjectsToCollectableObjects() {
         for(Map.Entry<String, List<MapPosition>> objectsEntry: objects.entrySet()) {

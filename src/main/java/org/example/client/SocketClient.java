@@ -11,7 +11,7 @@ public final class SocketClient {
         String address = "localhost";
 //        String address = "10.66.173.86";
         int port = 31415;
-        String teamName = "Probleme la Mansarda";
+        String teamName = "Probleme la Mansard4";
         MyClient client = new MyClient(address, port);
         new Thread(client).start();
         client.register(teamName);

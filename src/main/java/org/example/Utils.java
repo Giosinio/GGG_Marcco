@@ -3,28 +3,33 @@ package org.example;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Random;
 import java.util.stream.Collectors;
 import org.example.algorithm.LeeAlgorithmSolver;
 import org.example.algorithm.LeeResult;
 import org.example.dto.CollectableItem;
 import org.example.dto.MapPosition;
+import org.example.dto.MarketObj;
 import org.example.dto.enums.ConstructionType;
 import org.example.dto.enums.ObjectType;
+
+import static java.util.Map.Entry.comparingByValue;
 
 public class Utils {
     private static final Random random = new Random();
     private static final int MAXIMUM_STAMINA = 10;
 
-    private static final int BUILD_AFTER_ROUND = 225; //TODO - herte change this if the number of rounds is not 300, approximately 65% of the number of rounds
+    private static final int BUILD_AFTER_ROUND = 300; //TODO - herte change this if the number of rounds is not 300, approximately 65% of the number of rounds
 
     //objects are the objects on the map, all the food, building resources and bunnies(since 2 bunnies cannot be at the same time on the same tile,
     // we should be safe to consider we are on a resource if that resource is found)
-    public static String makeAction(Bunny bunny, char[][] table, String botId, Map<ObjectType, List<MapPosition>> objects, List<CollectableItem> collectableItems, List<MapPosition> buildingsPositions) {
-        if(bunny.isFirstMarketOffer && bunny.currentRound >= 250) {
+    public static String makeAction(Bunny bunny, char[][] table, String botId, Map<ObjectType, List<MapPosition>> objects, List<CollectableItem> collectableItems, List<MapPosition> buildingsPositions, List<MarketObj> market) {
+        /*if(bunny.isFirstMarketOffer && bunny.currentRound >= 250) {
             List<String> marketKeys = Arrays.asList("wood", "rock", "leaves", "carrot", "clay", "beets", "flower", "hay");
 
             for(String key: marketKeys) {
@@ -34,7 +39,7 @@ public class Utils {
                     return "{ \"market\": \"offer\", \"offer\": {\"offerType\": \"" + key + "\", \"offerCount\": 1, \"costType\": \"wood\", \"costCount\": 4}, \"bot_id\": \"" + botId +"\"}";
                 }
             }
-        }
+        }*/
         int i = bunny.row;
         int j = bunny.column;
         ObjectType bunnyObjectType = checkCollectableResourceAtTheGivenPosition(i, j, objects); // the object type on which the bunny stands on
@@ -62,6 +67,46 @@ public class Utils {
             return "{ \"action\" : \"build\", \"what\": \"" + constructionType.name().toLowerCase() + "\", \"bot_id\" :\"" + botId + "\" }";
         }
         else {
+
+
+                Map<ObjectType, Integer> stuffToTrade = new HashMap<>();
+                stuffToTrade.put(ObjectType.wood, bunny.backpack.get(ObjectType.wood));
+                stuffToTrade.put(ObjectType.clay, bunny.backpack.get(ObjectType.clay));
+                stuffToTrade.put(ObjectType.hay, bunny.backpack.get(ObjectType.hay));
+                stuffToTrade.put(ObjectType.rock, bunny.backpack.get(ObjectType.rock));
+
+                Optional<Map.Entry<ObjectType, Integer>> firstElementThatWeShouldSell = stuffToTrade.entrySet()
+                        .stream()
+                        .filter(e -> e.getValue() > 4)
+                        .findFirst();
+
+                String firstElementThatWeWant = stuffToTrade.entrySet()
+                        .stream()
+                        .min(comparingByValue())
+                        .get()
+                        .getKey()
+                        .name();
+
+                Optional<MarketObj> weNeedThat = market.stream()
+                        .filter(e -> e.getOfferType()
+                                .equals(firstElementThatWeWant))
+                        .findFirst();
+
+                if (firstElementThatWeShouldSell.isPresent()) {
+                    if (weNeedThat.isPresent() && weNeedThat.get()
+                            .getCostCount() == 1 && weNeedThat.get()
+                            .getCostType()
+                            .equals(firstElementThatWeShouldSell.get()
+                                            .getKey()
+                                            .name())) {
+                        return "{\"market\": \"buy\", \"offer\": {\"offerType\": \"" + firstElementThatWeWant + "\", \"offerCount\": 1, \"costType\": \"" + firstElementThatWeShouldSell.get()
+                                .getKey() + "\", \"costCount\": 1}, \"id\": " + weNeedThat.get()
+                                .getId() + " ,\"bot_id\":\"" + botId + "\"}";
+                    }
+                    return "{\"market\": \"offer\", \"offer\": {\"offerType\": \"" + firstElementThatWeShouldSell.get()
+                            .getKey() + "\", \"offerCount\": 1, \"costType\": \"" + firstElementThatWeWant + "\", \"costCount\": 1}, \"bot_id\":\"" + botId + "\"}";
+                }
+
             return computeResponse(bunny, table, collectableItems, botId);
 
         }
@@ -151,7 +196,7 @@ public class Utils {
                     }
                     else {
                         MapPosition bunnyPosition = new MapPosition(bunny.row, bunny.column);
-                        if(!buildingsPositions.contains(bunnyPosition) && (constructionType.score >= 100 || bunny.currentRound >= BUILD_AFTER_ROUND)) {
+                        if(!buildingsPositions.contains(bunnyPosition) && (constructionType.score >= 300 || bunny.currentRound >= BUILD_AFTER_ROUND)) {
                             return "build|" + constructionType.name().toLowerCase();
                         }
                     }

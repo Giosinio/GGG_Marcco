@@ -111,7 +111,7 @@ class MyClient implements Runnable {
                     bunny.setBackpack(marccoMessage.backpack);
                     List<CollectableItem> collectableIemList = changeMappingToCollectableItemList(marccoMessage.collectableObjects);
                     List<MapPosition> buildingsPositions = getBuildingsPositions(marccoMessage.objects);
-                    String resp=makeAction(bunny, this.board, botId, marccoMessage.collectableObjects, collectableIemList, buildingsPositions);
+                    String resp=makeAction(bunny, this.board, botId, marccoMessage.collectableObjects, collectableIemList, buildingsPositions, marccoMessage.market);
 
                     System.out.println(resp);
                     System.out.println(buildingsPositions.size());

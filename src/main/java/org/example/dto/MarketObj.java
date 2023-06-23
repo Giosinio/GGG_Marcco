@@ -1,5 +1,7 @@
 package org.example.dto;
 
+import java.util.List;
+
 public class MarketObj {
     private int id;
     private String offerType;
